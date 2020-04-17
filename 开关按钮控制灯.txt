@@ -1,0 +1,41 @@
+static void Main(string[] args)
+        {
+            string JsonFile = "CanSysConfig.json";
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .SetBasePath(Environment.CurrentDirectory)
+                .AddJsonFile($"" + JsonFile + "", optional: true, reloadOnChange: true)
+                .Build();
+
+             PinOnOff = int.Parse(configuration["PinValueOnOff"]);
+             PinLED = int.Parse(configuration["PinValueLED"]);
+
+            LogHelper.write("L0 开始" + "PinOnOff:"+ PinOnOff + " PinLED:"+ PinLED);
+
+           
+
+            while (true)
+            {
+                using GpioController gpio = new GpioController();
+                ///开关，COM接GPIO信号针，NO接Ground
+                gpio.OpenPin(PinOnOff, PinMode.Input);
+                LogHelper.write("L3 dervice0:" + gpio.Read(PinOnOff).ToString());
+                if (gpio.Read(PinOnOff) == PinValue.High)
+                {
+                    LogHelper.write("L5 亮灯");
+                    ///灯GND接round，DATA接GPIO信号针
+                    gpio.OpenPin(PinLED, PinMode.Output);
+                    gpio.Write(PinLED, PinValue.High);
+                    //Thread.Sleep(1000);//一秒
+                }
+                else
+                {
+                    LogHelper.write("L7 dervice4:未按");
+                    gpio.OpenPin(PinLED, PinMode.Output);
+                    gpio.Write(PinLED, PinValue.Low);
+                    //Thread.Sleep(1000);//一秒
+                }
+                Thread.Sleep(1000);//一秒
+            }
+              
+        }
